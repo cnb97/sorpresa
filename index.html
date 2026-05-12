@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sorpresa</title>
+
+  <!-- Fuente DM Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <!-- Librería de confeti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'DM Mono', monospace;
+    }
+
+    body {
+      background:#F4EDDA;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      color: #D0B044;
+    }
+
+    .container {
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-top: 30px;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 0.6s ease;
+      letter-spacing: -2px;
+    }
+
+    h1.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    button {
+      padding: 18px 35px;
+      font-size: 1.1rem;
+      border: 2px;
+      border-radius: 25px;
+      background: #D0B044;
+      color: #F4EDDA;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.3s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      background: #FA6435;
+    }
+
+    button.hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <button id="surpriseBtn">Pulsa para una sorpresa</button>
+    <h1 id="message">ME DEJO EL TFG PARA DICIEMBRE 🎉</h1>
+  </div>
+
+  <script>
+    const btn = document.getElementById("surpriseBtn");
+    const message = document.getElementById("message");
+
+    btn.addEventListener("click", () => {
+
+      // Ocultar botón
+      btn.classList.add("hidden");
+
+      // Mostrar mensaje
+      message.classList.add("show");
+
+      // Lanzar confeti
+      const duration = 3000;
+      const end = Date.now() + duration;
+
+      (function frame() {
+        confetti({
+          particleCount: 6,
+          angle: 60,
+          spread: 70,
+          origin: { x: 0 }
+        });
+
+        confetti({
+          particleCount: 6,
+          angle: 120,
+          spread: 70,
+          origin: { x: 1 }
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      })();
+    });
+  </script>
+
+</body>
+</html>
