@@ -3,119 +3,692 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sorpresa</title>
-
-  <!-- Fuente DM Mono -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-
-  <!-- Librería de confeti -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-
+  <title>Charlemos DTEC</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'DM Mono', monospace;
+    :root {
+      --bg: #f7f3ec;
+      --paper: #fffaf2;
+      --ink: #201c18;
+      --muted: #756b60;
+      --line: #d8cfc2;
+      --accent: #2947ff;
+      --accent-soft: #e8ebff;
+      --danger: #9b2c2c;
+      --radius: 20px;
     }
+
+    * { box-sizing: border-box; }
 
     body {
-      background:#F4EDDA;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      color: #D0B044;
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
     }
 
-    .container {
+    header {
+      padding: 42px 20px 26px;
       text-align: center;
-      padding: 20px;
+      border-bottom: 1px solid var(--line);
     }
 
-    h1 {
-      font-size: 3rem;
-      margin-top: 30px;
-      opacity: 0;
-      transform: scale(0.8);
-      transition: all 0.6s ease;
-      letter-spacing: -2px;
+    header h1 {
+      margin: 0;
+      font-size: clamp(2.3rem, 8vw, 5.8rem);
+      letter-spacing: -0.08em;
+      line-height: 0.9;
     }
 
-    h1.show {
-      opacity: 1;
-      transform: scale(1);
+    header p {
+      max-width: 700px;
+      margin: 18px auto 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .mode-switch {
+      margin: 24px auto 0;
+      display: inline-flex;
+      gap: 8px;
+      padding: 6px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+    }
+
+    .mode-switch button {
+      background: transparent;
+      color: var(--ink);
+      border: 0;
+      padding: 10px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .mode-switch button.active {
+      background: var(--ink);
+      color: white;
+    }
+
+    main {
+      width: min(1120px, 92vw);
+      margin: 32px auto 80px;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .student-layout {
+      display: grid;
+      grid-template-columns: 390px 1fr;
+      gap: 24px;
+    }
+
+    .panel, .question, .hero-card, .stat {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 30px rgba(40, 30, 20, 0.05);
+    }
+
+    .panel {
+      padding: 22px;
+      height: fit-content;
+    }
+
+    .hero-card {
+      padding: 28px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .hero-card h2 {
+      font-size: clamp(1.6rem, 4vw, 3rem);
+      margin: 0 0 8px;
+      letter-spacing: -0.06em;
+    }
+
+    .hero-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .live-badge {
+      background: var(--accent);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      white-space: nowrap;
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 1.15rem;
+    }
+
+    label {
+      display: block;
+      margin: 14px 0 7px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fffdf8;
+      color: var(--ink);
+      border-radius: 13px;
+      padding: 13px;
+      font: inherit;
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
     }
 
     button {
-      padding: 18px 35px;
-      font-size: 1.1rem;
-      border: 2px;
-      border-radius: 25px;
-      background: #D0B044;
-      color: #F4EDDA;
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 15px;
+      font: inherit;
       cursor: pointer;
-      transition: transform 0.2s ease, background 0.3s ease;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      background: var(--ink);
+      color: white;
     }
 
-    button:hover {
-      transform: scale(1.05);
-      background: #FA6435;
+    button:hover { opacity: 0.9; }
+
+    .primary {
+      width: 100%;
+      margin-top: 18px;
+      padding: 14px 18px;
+      background: var(--accent);
     }
 
-    button.hidden {
+    .secondary {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .filters, .moderator-tools {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filters input { flex: 1; min-width: 220px; }
+    .filters select { width: 180px; }
+
+    .question-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .question {
+      padding: 20px;
+    }
+
+    .question.newest {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft), 0 12px 30px rgba(40, 30, 20, 0.05);
+    }
+
+    .meta {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .tag {
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+    }
+
+    .tag.new {
+      background: var(--ink);
+      color: white;
+    }
+
+    .question h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: -0.03em;
+      line-height: 1.25;
+      white-space: pre-wrap;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .count {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+    }
+
+    .delete {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid #e0b8b8;
+      margin-left: auto;
+    }
+
+    .empty, .loading {
+      text-align: center;
+      color: var(--muted);
+      padding: 50px 20px;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+    }
+
+    .notice {
+      margin-top: 16px;
+      padding: 13px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 14px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .moderator-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      padding: 18px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 2rem;
+      letter-spacing: -0.05em;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .error {
+      background: #fff2f2;
+      border: 1px solid #efb5b5;
+      color: #8a1f1f;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 16px;
       display: none;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 30px;
+    }
+
+    @media (max-width: 900px) {
+      .student-layout, .hero-card {
+        grid-template-columns: 1fr;
+      }
+
+      .moderator-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .live-badge {
+        width: fit-content;
+      }
     }
   </style>
 </head>
-<body>
 
-  <div class="container">
-    <button id="surpriseBtn">Pulsa para una sorpresa</button>
-    <h1 id="message">ME DEJO EL TFG PARA DICIEMBRE 🎉</h1>
-  </div>
+<body>
+  <header>
+    <h1>Charlemos DTEC</h1>
+    <p>Envía preguntas durante la charla sin registrarte. Las preguntas aparecen directamente; moderación solo borra lo necesario.</p>
+
+    <div class="mode-switch">
+      <button id="studentModeBtn" class="active" onclick="setMode('student')">Vista público</button>
+      <button id="moderatorModeBtn" onclick="setMode('moderator')">Vista moderación</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="errorBox" class="error"></div>
+
+    <section id="studentView" class="view active">
+      <div class="hero-card">
+        <div>
+          <h2>Haz tu pregunta para la charla</h2>
+          <p>Escribe una duda breve. Puedes dejar tu nombre o enviarla como anónima. Las preguntas más votadas suben en la lista pública.</p>
+        </div>
+        <div class="live-badge">● charla en directo</div>
+      </div>
+
+      <div class="student-layout">
+        <aside class="panel">
+          <h2>Enviar pregunta</h2>
+
+          <form id="questionForm">
+            <label for="alias">Nombre o alias opcional</label>
+            <input id="alias" placeholder="Ej. anon, 2º DTEC..." />
+
+            <label for="category">Tema</label>
+            <select id="category" required>
+              <option value="Asignaturas">Asignaturas</option>
+              <option value="TFG">TFG</option>
+              <option value="Prácticas">Prácticas</option>
+              <option value="Erasmus">Erasmus</option>
+              <option value="Portfolio">Portfolio</option>
+              <option value="Futuro profesional">Futuro profesional</option>
+              <option value="Vida DTEC">Vida DTEC</option>
+              <option value="Otra">Otra</option>
+            </select>
+
+            <label for="title">Pregunta</label>
+            <textarea id="title" required maxlength="360" placeholder="Escribe aquí tu pregunta..."></textarea>
+
+            <button class="primary" type="submit">Enviar pregunta</button>
+          </form>
+
+          <div class="notice">
+            La vista pública se ordena por votos. La moderación muestra siempre la última pregunta arriba.
+          </div>
+        </aside>
+
+        <section>
+          <div class="filters">
+            <input id="search" placeholder="Buscar preguntas..." />
+            <select id="filterCategory">
+              <option value="Todas">Todas</option>
+              <option value="Asignaturas">Asignaturas</option>
+              <option value="TFG">TFG</option>
+              <option value="Prácticas">Prácticas</option>
+              <option value="Erasmus">Erasmus</option>
+              <option value="Portfolio">Portfolio</option>
+              <option value="Futuro profesional">Futuro profesional</option>
+              <option value="Vida DTEC">Vida DTEC</option>
+              <option value="Otra">Otra</option>
+            </select>
+          </div>
+
+          <div id="publicQuestionList" class="question-list">
+            <div class="loading">Cargando preguntas...</div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="moderatorView" class="view">
+      <div class="moderator-grid">
+        <div class="stat">
+          <strong id="totalCount">0</strong>
+          <span>preguntas recibidas</span>
+        </div>
+        <div class="stat">
+          <strong id="visibleCount">0</strong>
+          <span>preguntas visibles</span>
+        </div>
+      </div>
+
+      <div class="moderator-tools">
+        <button class="secondary" onclick="loadQuestions()">Actualizar</button>
+        <button class="delete" onclick="clearAll()">Vaciar charla</button>
+      </div>
+
+      <div id="moderatorQuestionList" class="question-list">
+        <div class="loading">Cargando preguntas...</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Charlemos DTEC · preguntas en directo
+  </footer>
 
   <script>
-    const btn = document.getElementById("surpriseBtn");
-    const message = document.getElementById("message");
+    const SUPABASE_URL = "https://ctoknbsfydtbwcdwoosy.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_oxyo0yIspxzVQfPoRvVYlw_RReyLtU2";
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    btn.addEventListener("click", () => {
+    const questionForm = document.getElementById("questionForm");
+    const publicQuestionList = document.getElementById("publicQuestionList");
+    const moderatorQuestionList = document.getElementById("moderatorQuestionList");
+    const searchInput = document.getElementById("search");
+    const filterCategory = document.getElementById("filterCategory");
+    const errorBox = document.getElementById("errorBox");
 
-      // Ocultar botón
-      btn.classList.add("hidden");
+    let currentMode = "student";
+    let questions = [];
 
-      // Mostrar mensaje
-      message.classList.add("show");
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById("studentView").classList.toggle("active", mode === "student");
+      document.getElementById("moderatorView").classList.toggle("active", mode === "moderator");
+      document.getElementById("studentModeBtn").classList.toggle("active", mode === "student");
+      document.getElementById("moderatorModeBtn").classList.toggle("active", mode === "moderator");
+      renderQuestions();
+    }
 
-      // Lanzar confeti
-      const duration = 3000;
-      const end = Date.now() + duration;
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.style.display = "block";
+    }
 
-      (function frame() {
-        confetti({
-          particleCount: 6,
-          angle: 60,
-          spread: 70,
-          origin: { x: 0 }
-        });
+    function hideError() {
+      errorBox.textContent = "";
+      errorBox.style.display = "none";
+    }
 
-        confetti({
-          particleCount: 6,
-          angle: 120,
-          spread: 70,
-          origin: { x: 1 }
-        });
+    async function loadQuestions() {
+      hideError();
 
-        if (Date.now() < end) {
-          requestAnimationFrame(frame);
-        }
-      })();
+      const { data, error } = await db
+        .from("questions")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        showError("Error cargando preguntas: " + error.message);
+        return;
+      }
+
+      questions = data || [];
+      renderQuestions();
+    }
+
+    function formatDate(dateString) {
+      return new Intl.DateTimeFormat("es", {
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(new Date(dateString));
+    }
+
+    function getBaseFilteredQuestions() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const selectedCategory = filterCategory.value;
+
+      return questions
+        .filter(q => selectedCategory === "Todas" || q.category === selectedCategory)
+        .filter(q =>
+          (q.title || "").toLowerCase().includes(searchTerm) ||
+          (q.category || "").toLowerCase().includes(searchTerm) ||
+          (q.alias || "").toLowerCase().includes(searchTerm)
+        );
+    }
+
+    function getPublicQuestions() {
+      return [...getBaseFilteredQuestions()]
+        .sort((a, b) => (b.votes || 0) - (a.votes || 0) || new Date(b.created_at) - new Date(a.created_at));
+    }
+
+    function getModeratorQuestions() {
+      return [...getBaseFilteredQuestions()]
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+
+    function getNewestId() {
+      if (questions.length === 0) return null;
+      return [...questions].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0].id;
+    }
+
+    function renderQuestions() {
+      const publicQuestions = getPublicQuestions();
+      const moderatorQuestions = getModeratorQuestions();
+      const newestId = getNewestId();
+
+      document.getElementById("totalCount").textContent = questions.length;
+      document.getElementById("visibleCount").textContent = moderatorQuestions.length;
+
+      if (publicQuestions.length === 0) {
+        publicQuestionList.innerHTML = `<div class="empty">Todavía no hay preguntas.</div>`;
+      } else {
+        publicQuestionList.innerHTML = publicQuestions.map(q => `
+          <article class="question">
+            <div class="meta">
+              <span class="tag">${escapeHTML(q.category)}</span>
+              <span>por ${escapeHTML(q.alias || "anon")}</span>
+              <span>·</span>
+              <span>${formatDate(q.created_at)}</span>
+            </div>
+
+            <h3>${escapeHTML(q.title)}</h3>
+
+            <div class="actions">
+              <button class="secondary" onclick="voteQuestion('${q.id}')">También quiero saberlo · <span class="count">${q.votes || 0}</span></button>
+            </div>
+          </article>
+        `).join("");
+      }
+
+      if (moderatorQuestions.length === 0) {
+        moderatorQuestionList.innerHTML = `<div class="empty">No hay preguntas con estos filtros.</div>`;
+      } else {
+        moderatorQuestionList.innerHTML = moderatorQuestions.map(q => `
+          <article class="question ${q.id === newestId ? "newest" : ""}">
+            <div class="meta">
+              ${q.id === newestId ? `<span class="tag new">Última</span>` : ``}
+              <span class="tag">${escapeHTML(q.category)}</span>
+              <span>por ${escapeHTML(q.alias || "anon")}</span>
+              <span>·</span>
+              <span>${formatDate(q.created_at)}</span>
+              <span>·</span>
+              <span><strong>${q.votes || 0}</strong> votos</span>
+            </div>
+
+            <h3>${escapeHTML(q.title)}</h3>
+
+            <div class="actions">
+              <button class="secondary" onclick="voteQuestion('${q.id}')">+1 voto</button>
+              <button class="delete" onclick="deleteQuestion('${q.id}')">Borrar pregunta</button>
+            </div>
+          </article>
+        `).join("");
+      }
+    }
+
+    function escapeHTML(text) {
+      return String(text || "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    questionForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      hideError();
+
+      const submitButton = questionForm.querySelector("button[type='submit']");
+      submitButton.disabled = true;
+      submitButton.textContent = "Enviando...";
+
+      const newQuestion = {
+        alias: document.getElementById("alias").value.trim() || "anon",
+        category: document.getElementById("category").value,
+        title: document.getElementById("title").value.trim(),
+        votes: 0
+      };
+
+      const { error } = await db
+        .from("questions")
+        .insert([newQuestion]);
+
+      submitButton.disabled = false;
+      submitButton.textContent = "Enviar pregunta";
+
+      if (error) {
+        showError("No se ha podido enviar la pregunta: " + error.message);
+        return;
+      }
+
+      questionForm.reset();
+      await loadQuestions();
+      document.getElementById("studentView").scrollIntoView({ behavior: "smooth" });
     });
-  </script>
 
+    async function voteQuestion(id) {
+      hideError();
+
+      const question = questions.find(q => q.id === id);
+      if (!question) return;
+
+      const { error } = await db
+        .from("questions")
+        .update({ votes: (question.votes || 0) + 1 })
+        .eq("id", id);
+
+      if (error) {
+        showError("No se ha podido votar: " + error.message);
+        return;
+      }
+
+      await loadQuestions();
+    }
+
+    async function deleteQuestion(id) {
+      if (!confirm("¿Borrar esta pregunta?")) return;
+      hideError();
+
+      const { error } = await db
+        .from("questions")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        showError("No se ha podido borrar: " + error.message);
+        return;
+      }
+
+      await loadQuestions();
+    }
+
+    async function clearAll() {
+      if (!confirm("¿Seguro que quieres borrar todas las preguntas de esta charla?")) return;
+      hideError();
+
+      const { error } = await db
+        .from("questions")
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000");
+
+      if (error) {
+        showError("No se ha podido vaciar la charla: " + error.message);
+        return;
+      }
+
+      await loadQuestions();
+    }
+
+    searchInput.addEventListener("input", renderQuestions);
+    filterCategory.addEventListener("change", renderQuestions);
+
+    db.channel("questions-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "questions" }, () => {
+        loadQuestions();
+      })
+      .subscribe();
+
+    loadQuestions();
+  </script>
 </body>
 </html>
